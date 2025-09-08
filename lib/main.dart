@@ -1,3 +1,4 @@
+import 'package:cinemax/views/date_utils.dart';
 import 'package:cinemax/views/login_Screen.dart';
 import 'package:cinemax/views/main_screen.dart';
 import 'package:cinemax/views/splash_screen.dart';
@@ -10,7 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Inisialisasi format tanggal lokal Indonesia
-  await initializeDateFormatting('id_ID', null);
+  await initializeDateFormatting('id_ID');
 
   // Set default locale
   Intl.defaultLocale = 'id_ID';
@@ -40,5 +41,15 @@ class MyApp extends StatelessWidget {
         MainScreen.id: (context) => MainScreen(),
       },
     );
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      final utcDate = DateTime.parse(dateString).toUtc(); // pastikan UTC
+      final localDate = utcDate.toLocal(); // convert ke lokal device
+      return IndonesianDateUtils.formatDateTime(localDate);
+    } catch (e) {
+      return dateString;
+    }
   }
 }

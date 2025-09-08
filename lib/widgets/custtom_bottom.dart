@@ -26,6 +26,7 @@ class CustomBottomNav extends StatelessWidget {
           label: "Tickets",
         ),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Admin"),
       ],
     );
   }

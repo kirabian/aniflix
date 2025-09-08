@@ -1,5 +1,6 @@
 import 'package:cinemax/models/list_jadwal_film.dart';
 import 'package:cinemax/views/film_service.dart';
+import 'package:cinemax/views/pesan_tiket_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,21 +26,10 @@ class _BookingDetailPageState extends State<BookingDetailPage>
   String? selectedDate;
   String? selectedCinema;
   String? selectedTime;
-  final List<String> dummySeats = [
-    "A1",
-    "A2",
-    "A3",
-    "A4",
-    "B1",
-    "B2",
-    "B3",
-    "B4",
-    "C1",
-    "C2",
-    "C3",
-    "C4",
-  ];
-  String? selectedSeat;
+
+  int? selectedScheduleId;
+  String? selectedPrice;
+  DateTime? selectedStartTime; // Tambahkan ini untuk menyimpan waktu mulai
 
   late TabController _tabController;
 
@@ -76,11 +66,10 @@ class _BookingDetailPageState extends State<BookingDetailPage>
               e.startTime != null &&
               DateFormat('yyyy-MM-dd').format(e.startTime!) == date,
         )
-        .map(
-          (e) => (e.cinema ?? "Unknown Cinema").toString(),
-        ) // paksa jadi String
+        .map<String>((e) => e.cinema?['name'] ?? "Unknown Cinema")
         .toSet()
         .toList();
+
     return cinemas;
   }
 
@@ -94,7 +83,7 @@ class _BookingDetailPageState extends State<BookingDetailPage>
           (e) =>
               e.startTime != null &&
               DateFormat('yyyy-MM-dd').format(e.startTime!) == date &&
-              (e.cinema ?? "Unknown Cinema") == cinema,
+              (e.cinema?['name'] ?? "Unknown Cinema") == cinema,
         )
         .map((e) => DateFormat('HH:mm').format(e.startTime!))
         .toList();
@@ -156,11 +145,12 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                   GestureDetector(
                     onTap: () async {
                       final url = Uri.parse(film.youtubeUrl!);
-                      if (await canLaunchUrl(url))
+                      if (await canLaunchUrl(url)) {
                         await launchUrl(
                           url,
                           mode: LaunchMode.externalApplication,
                         );
+                      }
                     },
                     child: Stack(
                       alignment: Alignment.center,
@@ -275,6 +265,9 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                                         selectedDate = date;
                                         selectedCinema = null;
                                         selectedTime = null;
+                                        selectedScheduleId = null;
+                                        selectedPrice = null;
+                                        selectedStartTime = null;
                                       });
                                     },
                                     child: Container(
@@ -328,6 +321,9 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                                       setState(() {
                                         selectedCinema = c;
                                         selectedTime = null;
+                                        selectedScheduleId = null;
+                                        selectedPrice = null;
+                                        selectedStartTime = null;
                                       });
                                     },
                                   );
@@ -354,6 +350,33 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                                     onSelected: (_) {
                                       setState(() {
                                         selectedTime = t;
+
+                                        // Cari schedule yang cocok
+                                        final selectedSchedule = jadwals
+                                            .firstWhere(
+                                              (e) =>
+                                                  e.startTime != null &&
+                                                  DateFormat(
+                                                        'yyyy-MM-dd',
+                                                      ).format(e.startTime!) ==
+                                                      selectedDate &&
+                                                  (e.cinema?['name'] ??
+                                                          "Unknown Cinema") ==
+                                                      selectedCinema &&
+                                                  DateFormat(
+                                                        'HH:mm',
+                                                      ).format(e.startTime!) ==
+                                                      t,
+                                            );
+
+                                        selectedScheduleId =
+                                            selectedSchedule.id;
+                                        selectedPrice =
+                                            selectedSchedule.price
+                                                ?.toString() ??
+                                            "0";
+                                        selectedStartTime = selectedSchedule
+                                            .startTime; // Simpan waktu mulai
                                       });
                                     },
                                   );
@@ -380,15 +403,34 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                       onPressed:
                           (selectedDate != null &&
                               selectedCinema != null &&
-                              selectedTime != null)
-                          ? () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "Booking ${film.title}, tanggal $selectedDate, bioskop $selectedCinema, jam $selectedTime",
+                              selectedTime != null &&
+                              selectedScheduleId != null &&
+                              selectedPrice != null &&
+                              selectedStartTime != null)
+                          ? () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PesanTiketPage(
+                                    scheduleId: selectedScheduleId!,
+                                    filmTitle: film.title ?? "-",
+                                    cinemaName: selectedCinema!,
+                                    date: selectedDate!,
+                                    time: selectedTime!,
+                                    price: selectedPrice!,
+                                    startTimeFromApi: selectedStartTime!
+                                        .toIso8601String(), // Kirim waktu lengkap
                                   ),
                                 ),
                               );
+
+                              if (result == true) {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  '/main',
+                                  arguments: 1,
+                                );
+                              }
                             }
                           : null,
                       child: const Text("Beli Tiket"),

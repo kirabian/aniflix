@@ -47,6 +47,11 @@ class CustomDrawer extends StatelessWidget {
             title: const Text("Profile"),
             onTap: () => onItemTap(3),
           ),
+          ListTile(
+            leading: const Icon(Icons.person, color: Colors.pink),
+            title: const Text("add_film"),
+            onTap: () => onItemTap(4),
+          ),
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),

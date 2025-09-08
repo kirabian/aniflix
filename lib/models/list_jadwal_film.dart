@@ -1,21 +1,21 @@
 // To parse this JSON data, do
 //
-//     final listJadwalFIlm = listJadwalFIlmFromJson(jsonString);
+//     final listJadwalFilm = listJadwalFilmFromJson(jsonString);
 
 import 'dart:convert';
 
-ListJadwalFIlm listJadwalFIlmFromJson(String str) =>
-    ListJadwalFIlm.fromJson(json.decode(str));
+ListJadwalFilm listJadwalFilmFromJson(String str) =>
+    ListJadwalFilm.fromJson(json.decode(str));
 
-String listJadwalFIlmToJson(ListJadwalFIlm data) => json.encode(data.toJson());
+String listJadwalFilmToJson(ListJadwalFilm data) => json.encode(data.toJson());
 
-class ListJadwalFIlm {
+class ListJadwalFilm {
   String? message;
   Data? data;
 
-  ListJadwalFIlm({this.message, this.data});
+  ListJadwalFilm({this.message, this.data});
 
-  factory ListJadwalFIlm.fromJson(Map<String, dynamic> json) => ListJadwalFIlm(
+  factory ListJadwalFilm.fromJson(Map<String, dynamic> json) => ListJadwalFilm(
     message: json["message"],
     data: json["data"] == null ? null : Data.fromJson(json["data"]),
   );
@@ -70,7 +70,7 @@ class Data {
         : List<Link>.from(json["links"]!.map((x) => Link.fromJson(x))),
     nextPageUrl: json["next_page_url"],
     path: json["path"],
-    perPage: json["per_page"],
+    perPage: int.tryParse(json["per_page"]?.toString() ?? "0"),
     prevPageUrl: json["prev_page_url"],
     to: json["to"],
     total: json["total"],
@@ -126,16 +126,16 @@ class DatumJadwal {
     cinema: json["cinema"],
     startTime: json["start_time"] == null
         ? null
-        : DateTime.parse(json["start_time"]),
+        : DateTime.tryParse(json["start_time"]),
     endTime: json["end_time"],
     price: json["price"],
     format: json["format"],
     createdAt: json["created_at"] == null
         ? null
-        : DateTime.parse(json["created_at"]),
+        : DateTime.tryParse(json["created_at"]),
     updatedAt: json["updated_at"] == null
         ? null
-        : DateTime.parse(json["updated_at"]),
+        : DateTime.tryParse(json["updated_at"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -198,8 +198,11 @@ class Link {
 
   Link({this.url, this.label, this.active});
 
-  factory Link.fromJson(Map<String, dynamic> json) =>
-      Link(url: json["url"], label: json["label"], active: json["active"]);
+  factory Link.fromJson(Map<String, dynamic> json) => Link(
+    url: json["url"],
+    label: json["label"]?.toString(),
+    active: json["active"],
+  );
 
   Map<String, dynamic> toJson() => {
     "url": url,

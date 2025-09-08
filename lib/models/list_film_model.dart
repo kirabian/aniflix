@@ -59,26 +59,36 @@ class Datum {
     this.schedules,
   });
 
-  factory Datum.fromJson(Map<String, dynamic> json) => Datum(
-    id: json["id"],
-    title: json["title"],
-    description: json["description"],
-    genre: json["genre"],
-    director: json["director"],
-    writer: json["writer"],
-    stats: json["stats"],
-    imageUrl: json["image_url"],
-    imagePath: json["image_path"],
-    youtubeUrl: json["youtube_url"],
-    cinemas: json["cinemas"] == null
-        ? []
-        : List<dynamic>.from(json["cinemas"]!.map((x) => x)),
-    schedules: json["schedules"] == null
-        ? []
-        : List<Schedule>.from(
-            json["schedules"]!.map((x) => Schedule.fromJson(x)),
-          ),
-  );
+  factory Datum.fromJson(Map<String, dynamic> json) {
+    // 🔥 Fix parsing schedules yang bisa dynamic
+    List<Schedule> parsedSchedules = [];
+    if (json["schedules"] is List) {
+      parsedSchedules = (json["schedules"] as List)
+          .map((x) => Schedule.fromJson(x))
+          .toList();
+    } else if (json["schedules"] is Map) {
+      parsedSchedules = [Schedule.fromJson(json["schedules"])];
+    } else {
+      parsedSchedules = [];
+    }
+
+    return Datum(
+      id: json["id"],
+      title: json["title"],
+      description: json["description"],
+      genre: json["genre"],
+      director: json["director"],
+      writer: json["writer"],
+      stats: json["stats"],
+      imageUrl: json["image_url"],
+      imagePath: json["image_path"],
+      youtubeUrl: json["youtube_url"],
+      cinemas: json["cinemas"] == null
+          ? []
+          : List<dynamic>.from(json["cinemas"]!.map((x) => x)),
+      schedules: parsedSchedules,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -125,20 +135,20 @@ class Schedule {
 
   factory Schedule.fromJson(Map<String, dynamic> json) => Schedule(
     id: json["id"],
-    filmId: json["film_id"],
+    filmId: json["film_id"]?.toString(),
     cinemaId: json["cinema_id"],
     startTime: json["start_time"] == null
         ? null
-        : DateTime.parse(json["start_time"]),
+        : DateTime.tryParse(json["start_time"]),
     endTime: json["end_time"],
     price: json["price"],
     format: json["format"],
     createdAt: json["created_at"] == null
         ? null
-        : DateTime.parse(json["created_at"]),
+        : DateTime.tryParse(json["created_at"]),
     updatedAt: json["updated_at"] == null
         ? null
-        : DateTime.parse(json["updated_at"]),
+        : DateTime.tryParse(json["updated_at"]),
   );
 
   Map<String, dynamic> toJson() => {
