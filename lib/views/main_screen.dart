@@ -64,7 +64,7 @@ class _MainScreenState extends State<MainScreen> {
     final List<Widget> widgetOptions = <Widget>[
       const HomeScreen(),
       const TiketSayaPage(),
-      const ProfileScreen(),
+      const CinemaListPage(),
       // AdminFilmPage dengan parameter films dan refresh
       AdminFilmPage(films: _films, onRefresh: _fetchFilms),
       const JadwalFilmCreatePage(),
@@ -104,7 +104,7 @@ class _MainScreenState extends State<MainScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ProfileScreen()),
+            MaterialPageRoute(builder: (_) => const CinemaListPage()),
           );
         },
         backgroundColor: Colors.orange,
