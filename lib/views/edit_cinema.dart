@@ -1,21 +1,30 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cinemax/models/get_cinema_model.dart';
 import 'package:cinemax/views/cinema_service.dart';
 
-class AddCinemaPage extends StatefulWidget {
-  const AddCinemaPage({super.key});
+class EditCinemaPage extends StatefulWidget {
+  final DatumCinema cinema;
+
+  const EditCinemaPage({super.key, required this.cinema});
 
   @override
-  State<AddCinemaPage> createState() => _AddCinemaPageState();
+  State<EditCinemaPage> createState() => _EditCinemaPageState();
 }
 
-class _AddCinemaPageState extends State<AddCinemaPage> {
+class _EditCinemaPageState extends State<EditCinemaPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
+  late TextEditingController _nameController;
 
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.cinema.name ?? "");
+  }
 
   Future<void> _pickImage() async {
     final picked = await _picker.pickImage(source: ImageSource.gallery);
@@ -28,18 +37,19 @@ class _AddCinemaPageState extends State<AddCinemaPage> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      await CinemaService.addCinema(
+      await CinemaService.updateCinema(
+        id: widget.cinema.id!,
         name: _nameController.text,
         imageFile: _selectedImage,
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Cinema berhasil ditambahkan")),
+        const SnackBar(content: Text("Cinema berhasil diupdate")),
       );
       Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal menambahkan cinema: $e")),
+        SnackBar(content: Text("Gagal update cinema: $e")),
       );
     }
   }
@@ -47,7 +57,7 @@ class _AddCinemaPageState extends State<AddCinemaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Tambah Cinema")),
+      appBar: AppBar(title: const Text("Edit Cinema")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -71,15 +81,26 @@ class _AddCinemaPageState extends State<AddCinemaPage> {
                         ),
                       ],
                     )
-                  : TextButton.icon(
-                      onPressed: _pickImage,
-                      icon: const Icon(Icons.image),
-                      label: const Text("Pilih Gambar"),
-                    ),
+                  : widget.cinema.imageUrl != null
+                      ? Column(
+                          children: [
+                            Image.network(widget.cinema.imageUrl!, height: 150),
+                            TextButton.icon(
+                              onPressed: _pickImage,
+                              icon: const Icon(Icons.image),
+                              label: const Text("Ganti Gambar"),
+                            ),
+                          ],
+                        )
+                      : TextButton.icon(
+                          onPressed: _pickImage,
+                          icon: const Icon(Icons.image),
+                          label: const Text("Pilih Gambar"),
+                        ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _submit,
-                child: const Text("Tambah Cinema"),
+                child: const Text("Update Cinema"),
               ),
             ],
           ),

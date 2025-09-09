@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: Day16SplashScreen.id,
       routes: {
-        "/login": (context) => LoginScreen02(),
+        "/login": (context) => LoginScreenAniFlix(),
         Day16SplashScreen.id: (context) => Day16SplashScreen(),
         MainScreen.id: (context) => MainScreen(),
       },

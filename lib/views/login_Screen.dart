@@ -4,193 +4,200 @@ import 'package:cinemax/views/main_screen.dart';
 import 'package:cinemax/views/register_Screen.dart';
 import 'package:flutter/material.dart';
 
-class LoginScreen02 extends StatefulWidget {
-  static const id = "/login_screen";
-  const LoginScreen02({super.key});
+class LoginScreenAniFlix extends StatefulWidget {
+  static const id = "/login_screen_aniflix";
+  const LoginScreenAniFlix({super.key});
 
   @override
-  State<LoginScreen02> createState() => _LoginScreen02State();
+  State<LoginScreenAniFlix> createState() => _LoginScreenAniFlixState();
 }
 
-class _LoginScreen02State extends State<LoginScreen02> {
-  bool _rememberMe = false;
+class _LoginScreenAniFlixState extends State<LoginScreenAniFlix> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFE8B4C2), // Pink pastel background
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo AniFlix
+              Column(
+                children: [
+                  Image.asset(
+                    "assets/images/background.png",
+                    height: 150,
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "AniFlix Cinema",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 80),
+
+              // Pilihan Login
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const UserLoginForm()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pink[400],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    "Login sebagai User",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AdminLoginForm()),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.pink.shade400, width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    "Login sebagai Admin",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.pink,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// =======================
+/// FORM LOGIN USER
+/// =======================
+class UserLoginForm extends StatefulWidget {
+  const UserLoginForm({super.key});
+
+  @override
+  State<UserLoginForm> createState() => _UserLoginFormState();
+}
+
+class _UserLoginFormState extends State<UserLoginForm> {
   bool _isLoading = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _checkLoginStatus();
-  }
-
-  Future<void> _checkLoginStatus() async {
-    final isLoggedIn = await PreferenceHandler.getLogin(); // pakai await
-    if (isLoggedIn == true) {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
-      );
-    }
-  }
-
   Future<void> _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email dan password harus diisi')),
+        const SnackBar(content: Text("Email dan password harus diisi")),
       );
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       await AuthenticationAPI.loginUser(
         email: _emailController.text,
         password: _passwordController.text,
       );
-
-      // Simpan login ke SharedPreferences
-      PreferenceHandler.saveLogin();
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Login berhasil')));
+      await PreferenceHandler.saveLogin();
 
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
+        MaterialPageRoute(builder: (_) => const MainScreen()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Login gagal: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login gagal: $e")),
+      );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 120),
-              const Text(
-                'Halo!',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              ),
-              const Text(
-                'Selamat datang di aplikasi JaBe (Jakarta Bersih)',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 30),
-              _buildTextField(
-                hintText: 'Masukkan Email Anda',
-                icon: Icons.email,
-                controller: _emailController,
-              ),
-              const SizedBox(height: 20),
-              _buildTextField(
-                hintText: 'Masukkan Password Anda',
-                icon: Icons.lock,
-                isPassword: true,
-                controller: _passwordController,
-              ),
-              const SizedBox(height: 15),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _rememberMe,
-                    onChanged: (value) {
-                      setState(() {
-                        _rememberMe = value ?? false;
-                      });
-                    },
-                  ),
-                  const Text('Ingat Saya'),
-                ],
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Masuk', style: TextStyle(fontSize: 16)),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Center(
-                child: Text('atau', style: TextStyle(color: Colors.grey)),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    // Google login logic
-                  },
-                  icon: Image.asset(
-                    'assets/icons/icon_google.png',
-                    width: 24,
-                    height: 24,
-                  ),
-                  label: const Text('Masuk dengan Google'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+      appBar: AppBar(title: const Text("Login User")),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            _buildTextField(
+              hintText: "Email",
+              icon: Icons.email_outlined,
+              controller: _emailController,
+            ),
+            const SizedBox(height: 20),
+            _buildTextField(
+              hintText: "Password",
+              icon: Icons.lock_outline,
+              isPassword: true,
+              controller: _passwordController,
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _login,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink[400],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Login"),
               ),
-              const SizedBox(height: 40),
-              const Divider(),
-              const SizedBox(height: 20),
-              const Center(
-                child: Text(
-                  "Belum memiliki akun?",
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const PostApiScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Daftar',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PostApiScreen()),
+                );
+              },
+              child: const Text("Belum punya akun? Daftar"),
+            ),
+          ],
         ),
       ),
     );
@@ -207,8 +214,101 @@ class _LoginScreen02State extends State<LoginScreen02> {
       obscureText: isPassword,
       decoration: InputDecoration(
         hintText: hintText,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+        prefixIcon: Icon(icon, color: Colors.pink),
+        filled: true,
+        fillColor: Colors.grey[100],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
+
+/// =======================
+/// FORM LOGIN ADMIN
+/// =======================
+class AdminLoginForm extends StatefulWidget {
+  const AdminLoginForm({super.key});
+
+  @override
+  State<AdminLoginForm> createState() => _AdminLoginFormState();
+}
+
+class _AdminLoginFormState extends State<AdminLoginForm> {
+  bool _isLoading = false;
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  Future<void> _loginAdmin() async {
+    if (_usernameController.text == "admin" &&
+        _passwordController.text == "12345") {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Username/Password Admin salah")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Login Admin")),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            TextField(
+              controller: _usernameController,
+              decoration: InputDecoration(
+                hintText: "Username Admin",
+                prefixIcon: const Icon(Icons.person, color: Colors.pink),
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: "Password Admin",
+                prefixIcon: const Icon(Icons.lock, color: Colors.pink),
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: _loginAdmin,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink[400],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text("Login Admin"),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -29,7 +29,7 @@ class _Day16SplashScreenState extends State<Day16SplashScreen> {
       if (isLogin == true) {
         context.pushReplacementNamed(MainScreen.id);
       } else {
-        context.push(LoginScreen02());
+        context.push(LoginScreenAniFlix());
       }
     });
   }

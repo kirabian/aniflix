@@ -5,7 +5,7 @@ String getCinemaToJson(GetCinema data) => json.encode(data.toJson());
 
 class GetCinema {
   String? message;
-  List<Datum>? data;
+  List<DatumCinema>? data;
 
   GetCinema({this.message, this.data});
 
@@ -13,7 +13,7 @@ class GetCinema {
     message: json["message"],
     data: json["data"] == null
         ? []
-        : List<Datum>.from(json["data"]!.map((x) => Datum.fromJson(x))),
+        : List<DatumCinema>.from(json["data"]!.map((x) => DatumCinema.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -23,16 +23,15 @@ class GetCinema {
         : List<dynamic>.from(data!.map((x) => x.toJson())),
   };
 }
-
-class Datum {
+class DatumCinema {
   int? id;
   String? name;
   String? imagePath;
   String? imageUrl;
 
-  Datum({this.id, this.name, this.imagePath, this.imageUrl});
+  DatumCinema({this.id, this.name, this.imagePath, this.imageUrl});
 
-  factory Datum.fromJson(Map<String, dynamic> json) => Datum(
+  factory DatumCinema.fromJson(Map<String, dynamic> json) => DatumCinema(
     id: json["id"],
     name: json["name"],
     imagePath: json["image_path"],

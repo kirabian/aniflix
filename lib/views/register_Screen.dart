@@ -234,7 +234,7 @@ class _PostApiScreenState extends State<PostApiScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => LoginScreen02(),
+                          builder: (context) => LoginScreenAniFlix(),
                         ),
                       );
                     },
