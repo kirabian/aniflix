@@ -1,6 +1,8 @@
 import 'package:cinemax/api/register_user.dart';
 import 'package:cinemax/shared_preferenced/preference.dart';
+import 'package:cinemax/views/auth/register_screen.dart';
 import 'package:cinemax/views/main_screen.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreenAniFlix extends StatefulWidget {
@@ -101,7 +103,7 @@ class _LoginScreenAniFlixState extends State<LoginScreenAniFlix> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pink[400],
+                    backgroundColor: Colors.pink[200],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -113,9 +115,42 @@ class _LoginScreenAniFlixState extends State<LoginScreenAniFlix> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                 ),
+              ),
+              const SizedBox(height: 20),
+
+              // Already have account
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text.rich(
+                    TextSpan(
+                      text: "Already have an account? ",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 12,
+                        color: Color(0xFF999999),
+                      ),
+                      children: [
+                        TextSpan(
+                          text: "Sign In",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF3C7EEE),
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pushNamed(context, PostApiScreen.id);
+                            },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

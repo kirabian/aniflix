@@ -1,5 +1,6 @@
-import 'package:cinemax/views/date_utils.dart';
 import 'package:cinemax/views/auth/login_screen.dart';
+import 'package:cinemax/views/auth/register_screen.dart';
+import 'package:cinemax/views/date_utils.dart';
 import 'package:cinemax/views/main_screen.dart';
 import 'package:cinemax/views/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         "/login": (context) => LoginScreenAniFlix(),
         Day16SplashScreen.id: (context) => Day16SplashScreen(),
         MainScreen.id: (context) => MainScreen(),
+        PostApiScreen.id: (context) => PostApiScreen(),
       },
     );
   }
