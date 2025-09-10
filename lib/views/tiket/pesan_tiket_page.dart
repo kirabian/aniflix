@@ -1,4 +1,4 @@
-import 'package:cinemax/views/tiket_service.dart';
+import 'package:cinemax/api/tiket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -125,14 +125,14 @@ class _PesanTiketPageState extends State<PesanTiketPage> {
 
     setState(() => isLoading = false);
 
-    if (result != null && result.data != null) {
+    if (result.data != null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Tiket berhasil dipesan!")));
       Navigator.pop(context, true);
     } else {
       // Tampilkan error message dari API jika ada
-      final errorMessage = result?.message ?? "Gagal memesan tiket";
+      final errorMessage = result.message ?? "Gagal memesan tiket";
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(errorMessage)));

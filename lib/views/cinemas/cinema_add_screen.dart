@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cinemax/views/cinema_service.dart';
+import 'package:cinemax/api/cinema_service.dart';
 
 class AddCinemaPage extends StatefulWidget {
   const AddCinemaPage({super.key});
@@ -38,9 +38,9 @@ class _AddCinemaPageState extends State<AddCinemaPage> {
       );
       Navigator.pop(context, true);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal menambahkan cinema: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal menambahkan cinema: $e")));
     }
   }
 

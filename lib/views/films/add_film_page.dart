@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:cinemax/models/list_film_model.dart';
-import 'package:cinemax/views/film_service.dart';
+import 'package:cinemax/api/film_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 

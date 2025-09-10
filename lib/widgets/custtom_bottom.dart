@@ -20,13 +20,19 @@ class CustomBottomNav extends StatelessWidget {
       onTap: onTap,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.movie), label: "Movies"),
         BottomNavigationBarItem(
-          icon: Icon(Icons.local_activity),
-          label: "Tickets",
+          icon: Icon(Icons.confirmation_number),
+          label: "Tikets",
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Admin"),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.local_movies),
+          label: "Cinema",
+        ),
+        BottomNavigationBarItem(icon: Icon(Icons.movie), label: "Movie"),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.schedule),
+          label: "Jadwal FIlm",
+        ),
       ],
     );
   }

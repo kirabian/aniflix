@@ -18,11 +18,13 @@ class CustomDrawer extends StatelessWidget {
             accountName: const Text("Anime Lover"),
             accountEmail: const Text("aniflix@cinema.com"),
             currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
+              backgroundColor: Color(0xFFE8B4C2),
               child: ClipOval(
                 child: Image.asset(
-                  "assets/images/background.png", // logo AniFlix kecil
+                  "assets/images/logo.png", // logo AniFlix kecil
                   fit: BoxFit.cover,
+                  // width: 200,
+                  // height: 200,
                 ),
               ),
             ),

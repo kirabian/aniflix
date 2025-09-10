@@ -1,8 +1,9 @@
 import 'dart:io';
+
+import 'package:cinemax/api/cinema_service.dart';
+import 'package:cinemax/models/get_cinema_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cinemax/models/get_cinema_model.dart';
-import 'package:cinemax/views/cinema_service.dart';
 
 class EditCinemaPage extends StatefulWidget {
   final DatumCinema cinema;
@@ -44,13 +45,16 @@ class _EditCinemaPageState extends State<EditCinemaPage> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Cinema berhasil diupdate")),
+        const SnackBar(
+          content: Text("Cinema berhasil diupdate"),
+          backgroundColor: Colors.pinkAccent,
+        ),
       );
       Navigator.pop(context, true);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal update cinema: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal update cinema: $e")));
     }
   }
 
@@ -82,21 +86,21 @@ class _EditCinemaPageState extends State<EditCinemaPage> {
                       ],
                     )
                   : widget.cinema.imageUrl != null
-                      ? Column(
-                          children: [
-                            Image.network(widget.cinema.imageUrl!, height: 150),
-                            TextButton.icon(
-                              onPressed: _pickImage,
-                              icon: const Icon(Icons.image),
-                              label: const Text("Ganti Gambar"),
-                            ),
-                          ],
-                        )
-                      : TextButton.icon(
+                  ? Column(
+                      children: [
+                        Image.network(widget.cinema.imageUrl!, height: 150),
+                        TextButton.icon(
                           onPressed: _pickImage,
                           icon: const Icon(Icons.image),
-                          label: const Text("Pilih Gambar"),
+                          label: const Text("Ganti Gambar"),
                         ),
+                      ],
+                    )
+                  : TextButton.icon(
+                      onPressed: _pickImage,
+                      icon: const Icon(Icons.image),
+                      label: const Text("Pilih Gambar"),
+                    ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _submit,

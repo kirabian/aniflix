@@ -1,48 +1,54 @@
-import 'package:cinemax/models/list_film_model.dart';
-import 'package:cinemax/views/add_film_page.dart';
-import 'package:cinemax/views/film_service.dart';
+// import 'package:cinemax/views/edit_cinema_page.dart';
+import 'package:cinemax/api/cinema_service.dart';
+import 'package:cinemax/models/get_cinema_model.dart';
+// import 'package:cinemax/views/add_cinema_page.dart';
+import 'package:cinemax/views/cinemas/cinema_add_screen.dart';
+import 'package:cinemax/views/cinemas/cinemas_edit_screen..dart';
 import 'package:flutter/material.dart';
 
-class AdminFilmPage extends StatefulWidget {
-  final List<Datum> films;
+class AdminCinemaPage extends StatefulWidget {
+  final List<DatumCinema> cinemas;
   final Future<void> Function()? onRefresh;
 
-  const AdminFilmPage({super.key, required this.films, this.onRefresh});
+  const AdminCinemaPage({super.key, required this.cinemas, this.onRefresh});
 
   @override
-  State<AdminFilmPage> createState() => _AdminFilmPageState();
+  State<AdminCinemaPage> createState() => _AdminCinemaPageState();
 }
 
-class _AdminFilmPageState extends State<AdminFilmPage> {
+class _AdminCinemaPageState extends State<AdminCinemaPage> {
   static const int pageSize = 10;
   int currentPage = 1;
 
-  List<Datum> get pagedFilms {
+  List<DatumCinema> get pagedCinemas {
     final start = (currentPage - 1) * pageSize;
     final end = start + pageSize;
-    return widget.films.sublist(
+    return widget.cinemas.sublist(
       start,
-      end > widget.films.length ? widget.films.length : end,
+      end > widget.cinemas.length ? widget.cinemas.length : end,
     );
   }
 
-  Future<void> _deleteFilm(int filmId) async {
+  Future<void> _deleteCinema(int cinemaId) async {
     try {
-      await FilmService.deleteFilm(filmId);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Film berhasil dihapus")));
+      await CinemaService.deleteCinema(cinemaId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Cinema berhasil dihapus"),
+          backgroundColor: Colors.pinkAccent,
+        ),
+      );
       if (widget.onRefresh != null) {
         await widget.onRefresh!();
       }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Gagal hapus film: $e")));
+      ).showSnackBar(SnackBar(content: Text("Gagal hapus cinema: $e")));
     }
   }
 
-  Future<void> _refreshFilms() async {
+  Future<void> _refreshCinemas() async {
     if (widget.onRefresh != null) await widget.onRefresh!();
     setState(() {
       currentPage = 1;
@@ -57,7 +63,7 @@ class _AdminFilmPageState extends State<AdminFilmPage> {
 
   @override
   Widget build(BuildContext context) {
-    final totalPages = (widget.films.length / pageSize).ceil();
+    final totalPages = (widget.cinemas.length / pageSize).ceil();
 
     return Scaffold(
       body: Column(
@@ -67,25 +73,25 @@ class _AdminFilmPageState extends State<AdminFilmPage> {
               padding: const EdgeInsets.all(12),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.65,
+                childAspectRatio: 0.8,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
-              itemCount: pagedFilms.length,
+              itemCount: pagedCinemas.length,
               itemBuilder: (context, index) {
-                final film = pagedFilms[index];
+                final cinema = pagedCinemas[index];
                 return Card(
                   child: Column(
                     children: [
                       Expanded(
-                        child: film.imageUrl != null
-                            ? Image.network(film.imageUrl!, fit: BoxFit.cover)
+                        child: cinema.imageUrl != null
+                            ? Image.network(cinema.imageUrl!, fit: BoxFit.cover)
                             : const SizedBox(),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: Text(
-                          film.title ?? "-",
+                          cinema.name ?? "-",
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -99,17 +105,15 @@ class _AdminFilmPageState extends State<AdminFilmPage> {
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
                             onPressed: () async {
-                              // Edit film
                               final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => AddFilmPage(
-                                    filmToEdit: film, // kirim film untuk edit
-                                  ),
+                                  builder: (_) =>
+                                      EditCinemaPage(cinema: cinema),
                                 ),
                               );
                               if (result == true) {
-                                _refreshFilms();
+                                _refreshCinemas();
                               }
                             },
                           ),
@@ -121,7 +125,7 @@ class _AdminFilmPageState extends State<AdminFilmPage> {
                                 builder: (context) => AlertDialog(
                                   title: const Text("Konfirmasi Hapus"),
                                   content: Text(
-                                    "Apakah Anda yakin ingin menghapus '${film.title}'?",
+                                    "Apakah Anda yakin ingin menghapus '${cinema.name}'?",
                                   ),
                                   actions: [
                                     TextButton(
@@ -138,7 +142,7 @@ class _AdminFilmPageState extends State<AdminFilmPage> {
                                 ),
                               );
                               if (confirm == true) {
-                                _deleteFilm(film.id!);
+                                _deleteCinema(cinema.id!);
                               }
                             },
                           ),
@@ -178,32 +182,31 @@ class _AdminFilmPageState extends State<AdminFilmPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton(
-            heroTag: "addFilm",
+            heroTag: "addCinema",
+            backgroundColor: Colors.pink[200],
             onPressed: () async {
-              // Tambah film baru
               final result = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const AddFilmPage()),
+                MaterialPageRoute(builder: (_) => const AddCinemaPage()),
               );
               if (result == true) {
-                _refreshFilms();
+                _refreshCinemas();
               }
             },
-            tooltip: "Tambah Film",
+            tooltip: "Tambah Cinema",
             child: const Icon(Icons.add),
           ),
           const SizedBox(height: 12),
-          FloatingActionButton(
-            heroTag: "editFilm",
-            onPressed: () {
-              // Shortcut Edit global (opsional)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Pilih film untuk diedit")),
-              );
-            },
-            tooltip: "Edit Film",
-            child: const Icon(Icons.edit),
-          ),
+          // FloatingActionButton(
+          //   heroTag: "editCinema",
+          //   onPressed: () {
+          //     ScaffoldMessenger.of(context).showSnackBar(
+          //       const SnackBar(content: Text("Pilih cinema untuk diedit")),
+          //     );
+          //   },
+          //   tooltip: "Edit Cinema",
+          //   child: const Icon(Icons.edit),
+          // ),
         ],
       ),
     );

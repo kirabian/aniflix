@@ -1,8 +1,11 @@
+import 'dart:convert';
+
+import 'package:cinemax/api/tiket_service.dart';
 import 'package:cinemax/models/tiket_film_saya.dart';
-import 'package:cinemax/views/tiket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:qr_flutter/qr_flutter.dart'; // Import package QR
 
 class TiketSayaPage extends StatefulWidget {
   const TiketSayaPage({super.key});
@@ -35,6 +38,76 @@ class _TiketSayaPageState extends State<TiketSayaPage> {
   String formatJam(DateTime? dt) {
     if (dt == null) return "-";
     return DateFormat('HH:mm').format(dt);
+  }
+
+  // Fungsi untuk menampilkan QR code
+  void _showTicketQRCode(Datum tiket) {
+    // Data yang akan diencode ke QR code
+    final qrData = jsonEncode({
+      'ticket_id': tiket.id,
+      'film': tiket.schedule?.film?.title,
+      'cinema': tiket.schedule?.cinema?.name,
+      'date': formatTanggal(tiket.schedule?.startTime),
+      'time': formatJam(tiket.schedule?.startTime),
+      'quantity': tiket.quantity,
+      'total_price': tiket.totalPrice,
+    });
+
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.all(20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Tiket ${tiket.schedule?.film?.title ?? 'Film'}",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "${tiket.schedule?.cinema?.name ?? 'Bioskop'} • ${formatTanggal(tiket.schedule?.startTime)}",
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 20),
+              // Widget QR code
+              QrImageView(
+                data: qrData,
+                version: QrVersions.auto,
+                size: 200,
+                backgroundColor: Colors.white,
+              ),
+              const SizedBox(height: 15),
+              Text(
+                "ID Tiket: ${tiket.id}",
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Tunjukkan QR code ini di bioskop",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text("Tutup"),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showDeleteConfirmationDialog(int ticketId) {
@@ -269,7 +342,11 @@ class _TiketSayaPageState extends State<TiketSayaPage> {
                               const SizedBox(height: 16),
                               Center(
                                 child: ElevatedButton.icon(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    _showTicketQRCode(
+                                      tiket,
+                                    ); // Panggil fungsi untuk menampilkan QR
+                                  },
                                   icon: const Icon(
                                     Icons.qr_code,
                                     color: Colors.white,

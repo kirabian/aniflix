@@ -1,5 +1,5 @@
 import 'package:cinemax/views/date_utils.dart';
-import 'package:cinemax/views/login_Screen.dart';
+import 'package:cinemax/views/auth/login_screen.dart';
 import 'package:cinemax/views/main_screen.dart';
 import 'package:cinemax/views/splash_screen.dart';
 import 'package:flutter/material.dart';

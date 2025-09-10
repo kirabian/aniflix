@@ -59,7 +59,7 @@ class Data {
     data: json["data"] == null
         ? []
         : List<DatumJadwal>.from(
-            json["data"]!.map((x) => DatumJadwal.fromJson(x)),
+            json["data"].map((x) => DatumJadwal.fromJson(x)),
           ),
     firstPageUrl: json["first_page_url"],
     from: json["from"],
@@ -67,7 +67,7 @@ class Data {
     lastPageUrl: json["last_page_url"],
     links: json["links"] == null
         ? []
-        : List<Link>.from(json["links"]!.map((x) => Link.fromJson(x))),
+        : List<Link>.from(json["links"].map((x) => Link.fromJson(x))),
     nextPageUrl: json["next_page_url"],
     path: json["path"],
     perPage: int.tryParse(json["per_page"]?.toString() ?? "0"),
@@ -100,10 +100,10 @@ class Data {
 class DatumJadwal {
   int? id;
   Film? film;
-  dynamic cinema;
+  Cinema? cinema;
   DateTime? startTime;
-  dynamic endTime;
-  dynamic price;
+  DateTime? endTime;
+  int? price;
   dynamic format;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -123,12 +123,16 @@ class DatumJadwal {
   factory DatumJadwal.fromJson(Map<String, dynamic> json) => DatumJadwal(
     id: json["id"],
     film: json["film"] == null ? null : Film.fromJson(json["film"]),
-    cinema: json["cinema"],
+    cinema: json["cinema"] == null ? null : Cinema.fromJson(json["cinema"]),
     startTime: json["start_time"] == null
         ? null
         : DateTime.tryParse(json["start_time"]),
-    endTime: json["end_time"],
-    price: json["price"],
+    endTime: json["end_time"] == null
+        ? null
+        : DateTime.tryParse(json["end_time"]),
+    price: json["price"] is int
+        ? json["price"]
+        : int.tryParse(json["price"].toString()),
     format: json["format"],
     createdAt: json["created_at"] == null
         ? null
@@ -141,9 +145,9 @@ class DatumJadwal {
   Map<String, dynamic> toJson() => {
     "id": id,
     "film": film?.toJson(),
-    "cinema": cinema,
+    "cinema": cinema?.toJson(),
     "start_time": startTime?.toIso8601String(),
-    "end_time": endTime,
+    "end_time": endTime?.toIso8601String(),
     "price": price,
     "format": format,
     "created_at": createdAt?.toIso8601String(),
@@ -188,6 +192,23 @@ class Film {
     "image_path": imagePath,
     "youtube_url": youtubeUrl,
     "youtube_embed_url": youtubeEmbedUrl,
+  };
+}
+
+class Cinema {
+  int? id;
+  String? name;
+  String? imageUrl;
+
+  Cinema({this.id, this.name, this.imageUrl});
+
+  factory Cinema.fromJson(Map<String, dynamic> json) =>
+      Cinema(id: json["id"], name: json["name"], imageUrl: json["image_url"]);
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "image_url": imageUrl,
   };
 }
 

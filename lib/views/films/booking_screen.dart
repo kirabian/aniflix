@@ -1,6 +1,6 @@
+import 'package:cinemax/api/film_service.dart';
 import 'package:cinemax/models/list_film_model.dart';
-import 'package:cinemax/views/booking_detail_screen.dart';
-import 'package:cinemax/views/film_service.dart';
+import 'package:cinemax/views/films/booking_detail_screen.dart';
 import 'package:flutter/material.dart';
 
 class BookingSection extends StatefulWidget {
@@ -16,7 +16,7 @@ class _BookingSectionState extends State<BookingSection> {
   @override
   void initState() {
     super.initState();
-    _filmsFuture = FilmService.fetchFilms(); // fetch list film
+    _filmsFuture = FilmService.fetchFilms();
   }
 
   void _retryFetch() {
@@ -53,7 +53,7 @@ class _BookingSectionState extends State<BookingSection> {
         final films = snapshot.data!;
 
         return SizedBox(
-          height: 220,
+          height: 300,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: films.length,
@@ -63,21 +63,24 @@ class _BookingSectionState extends State<BookingSection> {
                 width: 150,
                 margin: const EdgeInsets.only(right: 12),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        film.imageUrl ?? '',
-                        height: 140,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          height: 140,
-                          color: Colors.grey,
-                          child: const Icon(
-                            Icons.broken_image,
-                            color: Colors.white,
-                          ),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          film.imageUrl ?? '',
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                color: Colors.grey[300],
+                                child: const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.white,
+                                  size: 48,
+                                ),
+                              ),
                         ),
                       ),
                     ),
@@ -86,11 +89,18 @@ class _BookingSectionState extends State<BookingSection> {
                       film.title ?? 'No Title',
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     ElevatedButton(
-                      onPressed: () async {
-                        // Navigasi ke BookingDetailPage, fetch jadwal film
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pink[200],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -101,7 +111,10 @@ class _BookingSectionState extends State<BookingSection> {
                           ),
                         );
                       },
-                      child: const Text("Pesan"),
+                      child: const Text(
+                        "Pesan",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 ),

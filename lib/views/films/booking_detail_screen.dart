@@ -1,6 +1,6 @@
+import 'package:cinemax/api/film_service.dart';
 import 'package:cinemax/models/list_jadwal_film.dart';
-import 'package:cinemax/views/film_service.dart';
-import 'package:cinemax/views/pesan_tiket_page.dart';
+import 'package:cinemax/views/tiket/pesan_tiket_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -66,7 +66,7 @@ class _BookingDetailPageState extends State<BookingDetailPage>
               e.startTime != null &&
               DateFormat('yyyy-MM-dd').format(e.startTime!) == date,
         )
-        .map<String>((e) => e.cinema?['name'] ?? "Unknown Cinema")
+        .map<String>((e) => e.cinema?.name ?? "Unknown Cinema") // ✅ fix
         .toSet()
         .toList();
 
@@ -83,7 +83,7 @@ class _BookingDetailPageState extends State<BookingDetailPage>
           (e) =>
               e.startTime != null &&
               DateFormat('yyyy-MM-dd').format(e.startTime!) == date &&
-              (e.cinema?['name'] ?? "Unknown Cinema") == cinema,
+              (e.cinema?.name ?? "Unknown Cinema") == cinema, // ✅ fix
         )
         .map((e) => DateFormat('HH:mm').format(e.startTime!))
         .toList();
@@ -93,9 +93,9 @@ class _BookingDetailPageState extends State<BookingDetailPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink[50],
+      backgroundColor: Colors.pink[100],
       appBar: AppBar(
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: Colors.pink[100],
         title: Text(widget.filmTitle),
       ),
       body: FutureBuilder<List<DatumJadwal>>(
@@ -309,25 +309,98 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                children: cinemas.map((c) {
-                                  final isSelected = selectedCinema == c;
-                                  return ChoiceChip(
-                                    label: Text(c),
-                                    selected: isSelected,
-                                    selectedColor: Colors.pinkAccent,
-                                    onSelected: (_) {
-                                      setState(() {
-                                        selectedCinema = c;
-                                        selectedTime = null;
-                                        selectedScheduleId = null;
-                                        selectedPrice = null;
-                                        selectedStartTime = null;
-                                      });
-                                    },
-                                  );
-                                }).toList(),
+                              SizedBox(
+                                height: 100, // tinggi untuk image + teks
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: cinemas.length,
+                                  itemBuilder: (context, index) {
+                                    final cinemaName = cinemas[index];
+                                    final isSelected =
+                                        selectedCinema == cinemaName;
+
+                                    // Cari jadwal untuk mendapatkan gambar bioskop
+                                    final cinemaSchedule = jadwals.firstWhere(
+                                      (e) =>
+                                          e.cinema?.name == cinemaName &&
+                                          e.startTime != null,
+                                      orElse: () => jadwals.first,
+                                    );
+                                    final cinemaImage =
+                                        cinemaSchedule.cinema?.imageUrl;
+
+                                    return GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          selectedCinema = cinemaName;
+                                          selectedTime = null;
+                                          selectedScheduleId = null;
+                                          selectedPrice = null;
+                                          selectedStartTime = null;
+                                        });
+                                      },
+                                      child: Container(
+                                        width: 120,
+                                        margin: const EdgeInsets.only(
+                                          right: 12,
+                                        ),
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? Colors.pinkAccent
+                                              : Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.pinkAccent,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            // Image Bioskop
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.network(
+                                                cinemaImage ?? '',
+                                                width: 100,
+                                                height: 50,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (_, __, ___) =>
+                                                    Container(
+                                                      width: 100,
+                                                      height: 50,
+                                                      color: Colors.grey[300],
+                                                      child: const Icon(
+                                                        Icons.movie,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            // Nama bioskop
+                                            Text(
+                                              cinemaName,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: isSelected
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                               const SizedBox(height: 12),
                             ],
@@ -351,7 +424,6 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                                       setState(() {
                                         selectedTime = t;
 
-                                        // Cari schedule yang cocok
                                         final selectedSchedule = jadwals
                                             .firstWhere(
                                               (e) =>
@@ -360,9 +432,9 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                                                         'yyyy-MM-dd',
                                                       ).format(e.startTime!) ==
                                                       selectedDate &&
-                                                  (e.cinema?['name'] ??
+                                                  (e.cinema?.name ??
                                                           "Unknown Cinema") ==
-                                                      selectedCinema &&
+                                                      selectedCinema && // ✅ fix
                                                   DateFormat(
                                                         'HH:mm',
                                                       ).format(e.startTime!) ==

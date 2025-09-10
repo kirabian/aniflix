@@ -1,6 +1,6 @@
 import 'package:cinemax/extension/navigation.dart';
 import 'package:cinemax/shared_preferenced/preference.dart';
-import 'package:cinemax/views/login_Screen.dart';
+import 'package:cinemax/views/auth/login_screen.dart';
 import 'package:cinemax/views/main_screen.dart';
 import 'package:cinemax/widgets/appimage.dart';
 import 'package:flutter/material.dart';

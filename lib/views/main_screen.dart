@@ -1,16 +1,15 @@
+import 'package:cinemax/api/film_service.dart';
 import 'package:cinemax/models/list_film_model.dart';
-import 'package:cinemax/views/add_film.dart';
-import 'package:cinemax/views/custom_drawer.dart';
-import 'package:cinemax/views/film_service.dart';
+import 'package:cinemax/views/cinemas/cinema_screen.dart';
+import 'package:cinemax/views/films/list_film_screen.dart';
 import 'package:cinemax/views/home_screen.dart';
-import 'package:cinemax/views/list_jadwal_film.dart';
-import 'package:cinemax/views/profile_screen.dart';
-import 'package:cinemax/views/tiket_saya_page.dart';
+import 'package:cinemax/views/jadwal_films/list_jadwal.dart';
+import 'package:cinemax/views/tiket/tiket_saya_page.dart';
 import 'package:cinemax/widgets/custtom_bottom.dart';
 import 'package:flutter/material.dart';
 
+import '../api/cinema_service.dart';
 import '../models/get_cinema_model.dart' hide Datum;
-import '../views/cinema_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -49,9 +48,9 @@ class _MainScreenState extends State<MainScreen> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal load data: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal load data: $e")));
     }
   }
 
@@ -67,19 +66,13 @@ class _MainScreenState extends State<MainScreen> {
     final List<Widget> widgetOptions = <Widget>[
       const HomeScreen(),
       const TiketSayaPage(),
-      AdminCinemaPage(
-        cinemas: _cinemas,
-        onRefresh: _fetchData,
-      ),
-      AdminFilmPage(
-        films: _films,
-        onRefresh: _fetchData,
-      ),
+      AdminCinemaPage(cinemas: _cinemas, onRefresh: _fetchData),
+      AdminFilmPage(films: _films, onRefresh: _fetchData),
       const JadwalFilmCreatePage(),
     ];
 
     return Scaffold(
-      drawer: CustomDrawer(onItemTap: onDrawerItemTap),
+      // drawer: CustomDrawer(onItemTap: onDrawerItemTap),
       appBar: AppBar(
         backgroundColor: const Color(0xFFE8B4C2),
         elevation: 0,
@@ -108,24 +101,6 @@ class _MainScreenState extends State<MainScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : widgetOptions[_selectedIndex],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AdminCinemaPage(
-                cinemas: _cinemas,
-                onRefresh: _fetchData,
-              ),
-            ),
-          );
-          if (result == true) {
-            _fetchData();
-          }
-        },
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.local_activity, size: 32),
-      ),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _selectedIndex,
         onTap: (value) {
