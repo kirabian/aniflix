@@ -130,9 +130,10 @@ class DatumJadwal {
     endTime: json["end_time"] == null
         ? null
         : DateTime.tryParse(json["end_time"]),
-    price: json["price"] is int
-        ? json["price"]
-        : int.tryParse(json["price"].toString()),
+    // ✅ FIX: Logika parsing harga diperbaiki untuk menangani string desimal
+    price: json["price"] == null
+        ? null
+        : double.tryParse(json["price"].toString())?.toInt(),
     format: json["format"],
     createdAt: json["created_at"] == null
         ? null

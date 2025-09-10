@@ -30,8 +30,64 @@ class _PesanTiketPageState extends State<PesanTiketPage> {
   int quantity = 1;
   bool isLoading = false;
 
-  /// Parse harga dari API
-  int get hargaPerTiket => (double.tryParse(widget.price) ?? 0).toInt();
+  @override
+  void initState() {
+    super.initState();
+    _debugPrintData();
+  }
+
+  void _debugPrintData() {
+    print('=== DEBUG DATA PESAN TIKET ===');
+    print('Film: ${widget.filmTitle}');
+    print('Bioskop: ${widget.cinemaName}');
+    print('Date: ${widget.date}');
+    print('Time: ${widget.time}');
+    print('Raw Price: "${widget.price}"');
+    print('Schedule ID: ${widget.scheduleId}');
+    print('StartTimeFromApi: ${widget.startTimeFromApi}');
+    print('Parsed hargaPerTiket: $hargaPerTiket');
+    print('Formatted harga: ${formatCurrency(hargaPerTiket)}');
+    print('Total: ${formatCurrency(total)}');
+    print('==============================');
+  }
+
+  /// Parsing harga dengan berbagai format
+  int get hargaPerTiket {
+    if (widget.price.isEmpty) {
+      print('WARNING: Price is empty');
+      return 0;
+    }
+
+    try {
+      print('DEBUG - Raw price string: "${widget.price}"');
+
+      // Coba parsing langsung sebagai angka
+      if (RegExp(r'^\d+$').hasMatch(widget.price)) {
+        return int.parse(widget.price);
+      }
+
+      // Handle format dengan "Rp" dan titik
+      String cleaned = widget.price
+          .replaceAll(RegExp(r'[^\d]'), '') // Hapus semua non-digit
+          .trim();
+
+      print('DEBUG - After cleaning: "$cleaned"');
+
+      if (cleaned.isEmpty) {
+        print('WARNING: Cleaned price is empty');
+        return 0;
+      }
+
+      int parsedValue = int.tryParse(cleaned) ?? 0;
+      print('DEBUG - Parsed value: $parsedValue');
+
+      return parsedValue;
+    } catch (e) {
+      print('ERROR parsing price: $e');
+      return 0;
+    }
+  }
+
   int get total => hargaPerTiket * quantity;
 
   /// Format currency Indonesia
@@ -45,16 +101,6 @@ class _PesanTiketPageState extends State<PesanTiketPage> {
       'dd MMMM yyyy, HH:mm',
       'id_ID',
     ).format(dateTime.toLocal());
-  }
-
-  /// Format tanggal untuk tampilan
-  String formatDisplayDate(DateTime dateTime) {
-    return DateFormat('dd MMMM yyyy', 'id_ID').format(dateTime.toLocal());
-  }
-
-  /// Format waktu untuk tampilan
-  String formatDisplayTime(DateTime dateTime) {
-    return DateFormat('HH:mm', 'id_ID').format(dateTime.toLocal());
   }
 
   /// Cek apakah jadwal masih valid dengan penyesuaian zona waktu

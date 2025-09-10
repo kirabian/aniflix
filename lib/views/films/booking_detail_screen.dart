@@ -29,7 +29,7 @@ class _BookingDetailPageState extends State<BookingDetailPage>
 
   int? selectedScheduleId;
   String? selectedPrice;
-  DateTime? selectedStartTime; // Tambahkan ini untuk menyimpan waktu mulai
+  DateTime? selectedStartTime;
 
   late TabController _tabController;
 
@@ -38,6 +38,19 @@ class _BookingDetailPageState extends State<BookingDetailPage>
     super.initState();
     _jadwalFuture = FilmService.fetchJadwalFilmById(widget.filmId);
     _tabController = TabController(length: 2, vsync: this);
+  }
+
+  // Fungsi helper untuk format Rupiah, agar bisa dipakai di halaman ini
+  String _formatCurrency(int? amount) {
+    if (amount == null || amount <= 0) {
+      return "Gratis"; // Atau "N/A"
+    }
+    final format = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return format.format(amount);
   }
 
   void _retryFetch() {
@@ -66,28 +79,27 @@ class _BookingDetailPageState extends State<BookingDetailPage>
               e.startTime != null &&
               DateFormat('yyyy-MM-dd').format(e.startTime!) == date,
         )
-        .map<String>((e) => e.cinema?.name ?? "Unknown Cinema") // ✅ fix
+        .map<String>((e) => e.cinema?.name ?? "Unknown Cinema")
         .toSet()
         .toList();
 
     return cinemas;
   }
 
-  List<String> _getTimesByDateAndCinema(
+  List<DatumJadwal> _getSchedulesByDateAndCinema(
     List<DatumJadwal> jadwals,
     String date,
     String cinema,
   ) {
-    final times = jadwals
+    final schedules = jadwals
         .where(
           (e) =>
               e.startTime != null &&
               DateFormat('yyyy-MM-dd').format(e.startTime!) == date &&
-              (e.cinema?.name ?? "Unknown Cinema") == cinema, // ✅ fix
+              (e.cinema?.name ?? "Unknown Cinema") == cinema,
         )
-        .map((e) => DateFormat('HH:mm').format(e.startTime!))
         .toList();
-    return times;
+    return schedules;
   }
 
   @override
@@ -128,8 +140,9 @@ class _BookingDetailPageState extends State<BookingDetailPage>
           final cinemas = selectedDate != null
               ? _getCinemasByDate(jadwals, selectedDate!)
               : [];
-          final times = (selectedDate != null && selectedCinema != null)
-              ? _getTimesByDateAndCinema(
+          final schedulesForSelection =
+              (selectedDate != null && selectedCinema != null)
+              ? _getSchedulesByDateAndCinema(
                   jadwals,
                   selectedDate!,
                   selectedCinema!,
@@ -140,7 +153,6 @@ class _BookingDetailPageState extends State<BookingDetailPage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Trailer / Poster
                 if (film?.youtubeUrl != null)
                   GestureDetector(
                     onTap: () async {
@@ -179,7 +191,6 @@ class _BookingDetailPageState extends State<BookingDetailPage>
 
                 const SizedBox(height: 12),
 
-                // Poster + Info
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
@@ -215,7 +226,6 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                 ),
                 const SizedBox(height: 12),
 
-                // Tab Deskripsi / Jadwal
                 TabBar(
                   controller: _tabController,
                   labelColor: Colors.pinkAccent,
@@ -231,13 +241,11 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      // Deskripsi
                       Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Text(film.genre ?? 'No Description'),
                       ),
 
-                      // Jadwal
                       Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -302,7 +310,6 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                             ),
                             const SizedBox(height: 12),
 
-                            // Pilih Bioskop
                             if (selectedDate != null) ...[
                               const Text(
                                 "Pilih Bioskop:",
@@ -310,7 +317,7 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                               ),
                               const SizedBox(height: 8),
                               SizedBox(
-                                height: 100, // tinggi untuk image + teks
+                                height: 100,
                                 child: ListView.builder(
                                   scrollDirection: Axis.horizontal,
                                   itemCount: cinemas.length,
@@ -319,7 +326,6 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                                     final isSelected =
                                         selectedCinema == cinemaName;
 
-                                    // Cari jadwal untuk mendapatkan gambar bioskop
                                     final cinemaSchedule = jadwals.firstWhere(
                                       (e) =>
                                           e.cinema?.name == cinemaName &&
@@ -360,7 +366,6 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                           children: [
-                                            // Image Bioskop
                                             ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(8),
@@ -382,7 +387,6 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                                               ),
                                             ),
                                             const SizedBox(height: 8),
-                                            // Nama bioskop
                                             Text(
                                               cinemaName,
                                               textAlign: TextAlign.center,
@@ -405,7 +409,6 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                               const SizedBox(height: 12),
                             ],
 
-                            // Pilih Jam
                             if (selectedCinema != null) ...[
                               const Text(
                                 "Pilih Jam:",
@@ -414,43 +417,57 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                               const SizedBox(height: 8),
                               Wrap(
                                 spacing: 8,
-                                children: times.map((t) {
-                                  final isSelected = selectedTime == t;
+                                runSpacing: 8,
+                                children: schedulesForSelection.map((schedule) {
+                                  final timeString = DateFormat(
+                                    'HH:mm',
+                                  ).format(schedule.startTime!);
+                                  final isSelected = selectedTime == timeString;
+
+                                  final bool isPriceValid =
+                                      schedule.price != null &&
+                                      schedule.price! > 0;
+
                                   return ChoiceChip(
-                                    label: Text(t),
+                                    label: Column(
+                                      children: [
+                                        Text(timeString),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          _formatCurrency(schedule.price),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: isSelected
+                                                ? Colors.white70
+                                                : Colors.black54,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                     selected: isSelected,
+                                    backgroundColor: !isPriceValid
+                                        ? Colors.grey.shade300
+                                        : Colors.white,
                                     selectedColor: Colors.pinkAccent,
-                                    onSelected: (_) {
-                                      setState(() {
-                                        selectedTime = t;
-
-                                        final selectedSchedule = jadwals
-                                            .firstWhere(
-                                              (e) =>
-                                                  e.startTime != null &&
-                                                  DateFormat(
-                                                        'yyyy-MM-dd',
-                                                      ).format(e.startTime!) ==
-                                                      selectedDate &&
-                                                  (e.cinema?.name ??
-                                                          "Unknown Cinema") ==
-                                                      selectedCinema && // ✅ fix
-                                                  DateFormat(
-                                                        'HH:mm',
-                                                      ).format(e.startTime!) ==
-                                                      t,
-                                            );
-
-                                        selectedScheduleId =
-                                            selectedSchedule.id;
-                                        selectedPrice =
-                                            selectedSchedule.price
-                                                ?.toString() ??
-                                            "0";
-                                        selectedStartTime = selectedSchedule
-                                            .startTime; // Simpan waktu mulai
-                                      });
-                                    },
+                                    labelStyle: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : !isPriceValid
+                                          ? Colors.grey.shade600
+                                          : Colors.black,
+                                    ),
+                                    onSelected: isPriceValid
+                                        ? (_) {
+                                            setState(() {
+                                              selectedTime = timeString;
+                                              selectedScheduleId = schedule.id;
+                                              selectedPrice = schedule.price!
+                                                  .toString();
+                                              selectedStartTime =
+                                                  schedule.startTime;
+                                            });
+                                          }
+                                        : null,
                                   );
                                 }).toList(),
                               ),
@@ -491,7 +508,7 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                                     time: selectedTime!,
                                     price: selectedPrice!,
                                     startTimeFromApi: selectedStartTime!
-                                        .toIso8601String(), // Kirim waktu lengkap
+                                        .toIso8601String(),
                                   ),
                                 ),
                               );
@@ -505,7 +522,10 @@ class _BookingDetailPageState extends State<BookingDetailPage>
                               }
                             }
                           : null,
-                      child: const Text("Beli Tiket"),
+                      child: const Text(
+                        "Beli Tiket",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ),

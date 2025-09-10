@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cinemax/api/endpoint/endpoint.dart';
+import 'package:cinemax/models/get_cinema_model.dart';
+import 'package:cinemax/models/list_film_model.dart';
 import 'package:cinemax/shared_preferenced/preference.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,13 +16,11 @@ class JadwalCreateService {
     final url = Uri.parse(Endpoint.jadwalFilms);
     final body = jsonEncode(data);
 
-    log("=============================================");
     log("MEMBUAT JADWAL BARU");
     log("URL Target      : ${Endpoint.jadwalFilms}");
     log("Method          : POST");
     log("Token yang dipakai: Bearer $token");
     log("Body Request    : $body");
-    log("=============================================");
 
     try {
       final response = await http.post(
@@ -44,7 +44,61 @@ class JadwalCreateService {
   }
 
   /// =========================
-  /// READ LIST JADWAL FILM
+  /// FETCH LIST FILM
+  /// =========================
+  static Future<ListFilmModel> getFilms() async {
+    final token = await PreferenceHandler.getToken();
+    final url = Uri.parse(Endpoint.films); // endpoint film-mu
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Gagal ambil daftar film');
+      }
+
+      return listFilmModelFromJson(response.body);
+    } catch (e) {
+      log('Exception saat getFilms: $e');
+      rethrow;
+    }
+  }
+
+  /// =========================
+  /// FETCH LIST CINEMA
+  /// =========================
+  static Future<GetCinema> getCinemas() async {
+    final token = await PreferenceHandler.getToken();
+    final url = Uri.parse(Endpoint.Cinema); // endpoint bioskop-mu
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Gagal ambil daftar bioskop');
+      }
+
+      return getCinemaFromJson(response.body);
+    } catch (e) {
+      log('Exception saat getCinemas: $e');
+      rethrow;
+    }
+  }
+
+  /// =========================
+  /// FETCH LIST JADWAL FILM
   /// =========================
   static Future<List<Map<String, dynamic>>> fetchJadwal() async {
     final token = await PreferenceHandler.getToken();
